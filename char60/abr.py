@@ -37,7 +37,7 @@ print('='*10, 'comp data is ready', '='*10)
 ccm = conn.raw_sql("""
                   select gvkey, lpermno as permno, linktype, linkprim, 
                   linkdt, linkenddt
-                  from crsp.ccmxpf_linktable
+                  from crspq.ccmxpf_linktable
                   where linktype in ('LU', 'LC')
                   """)
 
@@ -62,7 +62,7 @@ ccm2 = ccm2[['gvkey', 'datadate', 'rdq', 'fyearq', 'fqtr', 'permno']]
 # Report Date of Quarterly Earnings (rdq) may not be trading day, we need to get the first trading day on or after rdq
 crsp_dsi = conn.raw_sql("""
                         select distinct date
-                        from crsp.dsi
+                        from crspq.dsi
                         where date >= '01/01/1959'
                         """)
 
@@ -93,8 +93,8 @@ print('='*10, 'crsp block is ready', '='*10)
 crsp_d = conn.raw_sql("""
                       select a.prc, a.ret, a.shrout, a.vol, a.cfacpr, a.cfacshr, a.permno, a.permco, a.date,
                       b.siccd, b.ncusip, b.shrcd, b.exchcd
-                      from crsp.dsf as a
-                      left join crsp.dsenames as b
+                      from crspq.dsf as a
+                      left join crspq.dsenames as b
                       on a.permno=b.permno
                       and b.namedt<=a.date
                       and a.date<=b.nameendt
@@ -114,7 +114,7 @@ crsp_d['date'] = pd.to_datetime(crsp_d['date'])
 # add delisting return
 dlret = conn.raw_sql("""
                      select permno, dlret, dlstdt 
-                     from crsp.dsedelist
+                     from crspq.dsedelist
                      where dlstdt >= '01/01/1959'
                      """)
 
@@ -130,7 +130,7 @@ crsp_d = crsp_d.sort_values(by=['date', 'permno', 'meq'])
 # sprtrn
 crspsp500d = conn.raw_sql("""
                           select date, sprtrn 
-                          from crsp.dsi
+                          from crspq.dsi
                           where date >= '01/01/1959'
                           """)
 
@@ -203,7 +203,7 @@ print('='*10, 'start populate', '='*10)
 # populate the quarterly abr to monthly
 crsp_msf = conn.raw_sql("""
                         select distinct date
-                        from crsp.msf
+                        from crspq.msf
                         where date >= '01/01/1959'
                         """)
 

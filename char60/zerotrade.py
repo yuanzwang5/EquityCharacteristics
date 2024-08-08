@@ -26,7 +26,7 @@ conn = wrds.Connection()
 # CRSP Block
 crsp = conn.raw_sql("""
                     select a.permno, a.date, a.vol, a.shrout
-                    from crsp.dsf as a
+                    from crspq.dsf as a
                     where a.date > '01/01/1959'
                     """)
 
@@ -90,14 +90,17 @@ def get_baspread(df, firm_list):
             if temp['permno'].count() < 21:
                 pass
             else:
-                index = temp.tail(1).index
-                X = pd.DataFrame()
-                X[['vol', 'shrout']] = temp[['vol', 'shrout']]
-                X['countzero'] = np.where(X['vol'] == 0, 1, 0)
-                X['turn'] = (X['vol'] / X['shrout'])
-                X['turn'] = np.where(X['turn'] == 0, np.inf, X['turn'])
-                zerotrade = (X['countzero']+((1/X['turn'])/480000))*21/X['vol'].count()
-                df.loc[index, 'zerotrade'] = zerotrade
+                if temp['vol'].notna().sum() < 21:
+                    pass
+                else:
+                    index = temp.tail(1).index
+                    X = pd.DataFrame()
+                    X[['vol', 'shrout']] = temp[['vol', 'shrout']]
+                    X['countzero'] = np.where(X['vol'] == 0, 1, 0)
+                    X['turn'] = (X['vol'] / X['shrout'])
+                    X['turn'] = np.where(X['turn'] == 0, np.inf, X['turn'])
+                    zerotrade = (X['countzero']+((1/X['turn'])/480000))*21/X['vol'].count()
+                    df.loc[index, 'zerotrade'] = zerotrade
     return df
 
 

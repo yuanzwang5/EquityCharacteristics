@@ -26,7 +26,7 @@ comp = conn.raw_sql("""
                         and datafmt = 'STD'
                         and popsrc = 'D'
                         and consol = 'C'
-                        and datadate >= '01/01/1959'
+                        and datadate >= '01/01/1925'
                         """)
 
 comp['datadate'] = pd.to_datetime(comp['datadate'])
@@ -37,7 +37,7 @@ comp['datadate'] = pd.to_datetime(comp['datadate'])
 ccm = conn.raw_sql("""
                   select gvkey, lpermno as permno, linktype, linkprim, 
                   linkdt, linkenddt
-                  from crsp.ccmxpf_linktable
+                  from crspq.ccmxpf_linktable
                   where linktype in ('LU', 'LC')
                   """)
 
@@ -85,8 +85,8 @@ ccm2['sue'] = (ccm2['eps'] - ccm2['e4'])/ccm2['sue_std']
 # populate the quarterly sue to monthly
 crsp_msf = conn.raw_sql("""
                         select distinct date
-                        from crsp.msf
-                        where date >= '01/01/1959'
+                        from crspq.msf
+                        where date >= '01/01/1925'
                         """)
 
 ccm2['datadate'] = pd.to_datetime(ccm2['datadate'])

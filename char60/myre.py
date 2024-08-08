@@ -43,7 +43,7 @@ ibes['merge_date'] = ibes['statpers']+MonthEnd(0)
 
 crsp_msf = conn.raw_sql("""
                         select permno, date, prc, cfacpr
-                        from crsp.msf
+                        from crspq.msf
                         """)
 
 crsp_msf['date'] = pd.to_datetime(crsp_msf['date'])

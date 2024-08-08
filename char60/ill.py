@@ -26,7 +26,7 @@ conn = wrds.Connection()
 # CRSP Block
 crsp = conn.raw_sql("""
                     select a.permno, a.date, a.ret, a.vol, a.prc
-                    from crsp.dsf as a
+                    from crspq.dsf as a
                     where a.date > '01/01/1959'
                     """)
 
@@ -42,7 +42,7 @@ crsp['date'] = pd.to_datetime(crsp['date'])
 # add delisting return
 dlret = conn.raw_sql("""
                      select permno, dlret, dlstdt 
-                     from crsp.dsedelist
+                     from crspq.dsedelist
                      """)
 
 dlret.permno = dlret.permno.astype(int)
@@ -106,11 +106,14 @@ def get_baspread(df, firm_list):
             if temp['permno'].count() < 21:
                 pass
             else:
-                index = temp.tail(1).index
-                X = pd.DataFrame()
-                X[['vol', 'prc', 'retadj']] = temp[['vol', 'prc', 'retadj']]
-                ill = (abs(X['retadj']) / abs(X['prc'])*X['vol']).mean()
-                df.loc[index, 'ill'] = ill
+                if temp['vol'].notna().sum() < 21:
+                    pass
+                else:
+                    index = temp.tail(1).index
+                    X = pd.DataFrame()
+                    X[['vol', 'prc', 'retadj']] = temp[['vol', 'prc', 'retadj']]
+                    ill = (abs(X['retadj']) / abs(X['prc'])*X['vol']).mean()
+                    df.loc[index, 'ill'] = ill
     return df
 
 

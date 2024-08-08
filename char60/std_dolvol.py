@@ -26,7 +26,7 @@ conn = wrds.Connection()
 # CRSP Block
 crsp = conn.raw_sql("""
                     select a.permno, a.date, a.vol, a.prc
-                    from crsp.dsf as a
+                    from crspq.dsf as a
                     where a.date > '01/01/1959'
                     """)
 
@@ -90,11 +90,14 @@ def get_baspread(df, firm_list):
             if temp['permno'].count() < 21:
                 pass
             else:
-                index = temp.tail(1).index
-                X = pd.DataFrame()
-                X[['prc', 'vol']] = temp[['prc', 'vol']]
-                std_dolvol = np.log(abs((X['vol']*X['prc']))).replace([np.inf, -np.inf], np.nan).std()
-                df.loc[index, 'std_dolvol'] = std_dolvol
+                if temp['vol'].notna().sum() < 21:
+                    pass
+                else:
+                    index = temp.tail(1).index
+                    X = pd.DataFrame()
+                    X[['prc', 'vol']] = temp[['prc', 'vol']]
+                    std_dolvol = np.log(abs((X['vol']*X['prc']))).replace([np.inf, -np.inf], np.nan).std()
+                    df.loc[index, 'std_dolvol'] = std_dolvol
     return df
 
 
