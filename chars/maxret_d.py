@@ -25,10 +25,8 @@ conn = wrds.Connection()
 
 # CRSP Block
 crsp = conn.raw_sql("""
-                    select a.permno, a.date, a.ret, (a.ret - b.rf) as exret, a.askhi, a.bidlo
+                    select a.permno, a.date, a.ret, a.vol
                     from crsp.dsf as a
-                    left join ff.factors_daily as b
-                    on a.date=b.date
                     where a.date > '01/01/1959'
                     """)
 
@@ -92,11 +90,14 @@ def get_baspread(df, firm_list):
             if temp['permno'].count() < 21:
                 pass
             else:
-                index = temp.tail(1).index
-                X = pd.DataFrame()
-                X[['askhi', 'bidlo']] = temp[['askhi', 'bidlo']]
-                bid = (X['askhi'] - X['bidlo'])/((X['askhi'] + X['bidlo'])/2).mean()
-                df.loc[index, 'baspread'] = bid
+                if temp['vol'].notna().sum() < 21:
+                    pass
+                else:
+                    index = temp.tail(1).index
+                    X = pd.DataFrame()
+                    X[['ret']] = temp[['ret']]
+                    maxret = X['ret'].max()
+                    df.loc[index, 'maxret'] = maxret
     return df
 
 
@@ -153,9 +154,9 @@ if __name__ == '__main__':
     crsp = main(0, 1, 0.05)
 
 # process dataframe
-crsp = crsp.dropna(subset=['baspread'])  # drop NA due to rolling
+crsp = crsp.dropna(subset=['maxret'])  # drop NA due to rolling
 crsp = crsp.reset_index(drop=True)
-crsp = crsp[['permno', 'date', 'baspread']]
+crsp = crsp[['permno', 'date', 'maxret']]
 
-with open('baspread.feather', 'wb') as f:
+with open('maxret.feather', 'wb') as f:
     feather.write_feather(crsp, f)

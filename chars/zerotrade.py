@@ -25,7 +25,7 @@ conn = wrds.Connection()
 
 # CRSP Block
 crsp = conn.raw_sql("""
-                    select a.permno, a.date, a.ret, a.vol, a.prc
+                    select a.permno, a.date, a.vol, a.shrout
                     from crsp.dsf as a
                     where a.date > '01/01/1959'
                     """)
@@ -38,22 +38,6 @@ crsp['permno'] = crsp['permno'].astype(int)
 
 # Line up date to be end of month
 crsp['date'] = pd.to_datetime(crsp['date'])
-
-# add delisting return
-dlret = conn.raw_sql("""
-                     select permno, dlret, dlstdt 
-                     from crsp.dsedelist
-                     """)
-
-dlret.permno = dlret.permno.astype(int)
-dlret['dlstdt'] = pd.to_datetime(dlret['dlstdt'])
-dlret['date'] = dlret['dlstdt']
-
-# merge delisting return to crsp return
-crsp = pd.merge(crsp, dlret, how='left', on=['permno', 'date'])
-crsp['dlret'] = crsp['dlret'].fillna(0)
-crsp['ret'] = crsp['ret'].fillna(0)
-crsp['retadj'] = (1 + crsp['ret']) * (1 + crsp['dlret']) - 1
 
 # find the closest trading day to the end of the month
 crsp['monthend'] = crsp['date'] + MonthEnd(0)
@@ -106,11 +90,17 @@ def get_baspread(df, firm_list):
             if temp['permno'].count() < 21:
                 pass
             else:
-                index = temp.tail(1).index
-                X = pd.DataFrame()
-                X[['vol', 'prc', 'retadj']] = temp[['vol', 'prc', 'retadj']]
-                ill = (abs(X['retadj']) / abs(X['prc'])*X['vol']).mean()
-                df.loc[index, 'ill'] = ill
+                if temp['vol'].notna().sum() < 21:
+                    pass
+                else:
+                    index = temp.tail(1).index
+                    X = pd.DataFrame()
+                    X[['vol', 'shrout']] = temp[['vol', 'shrout']]
+                    X['countzero'] = np.where(X['vol'] == 0, 1, 0)
+                    X['turn'] = (X['vol'] / X['shrout'])
+                    X['turn'] = np.where(X['turn'] == 0, np.inf, X['turn'])
+                    zerotrade = (X['countzero']+((1/X['turn'])/480000))*21/X['vol'].count()
+                    df.loc[index, 'zerotrade'] = zerotrade
     return df
 
 
@@ -167,9 +157,9 @@ if __name__ == '__main__':
     crsp = main(0, 1, 0.05)
 
 # process dataframe
-crsp = crsp.dropna(subset=['ill'])  # drop NA due to rolling
+crsp = crsp.dropna(subset=['zerotrade'])  # drop NA due to rolling
 crsp = crsp.reset_index(drop=True)
-crsp = crsp[['permno', 'date', 'ill']]
+crsp = crsp[['permno', 'date', 'zerotrade']]
 
-with open('ill.feather', 'wb') as f:
+with open('zerotrade.feather', 'wb') as f:
     feather.write_feather(crsp, f)
