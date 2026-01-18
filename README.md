@@ -1,16 +1,5 @@
-### Contact
-
-- Xin He
-- xinhe9701@gmail.com
-- [www.xinhesean.com](https://www.xinhesean.com)
-
-### Version
-
 - All in Python
 - The SAS version is here [EquityCharacteristicsSAS](https://feng-cityuhk.github.io/EquityCharacteristicsSAS/)
-
-- Extension to [China A Share Market](https://github.com/Quantactix/ChinaAShareEquityCharacteristics)
-- Extension to [Factors and Portfolios in China Market](https://github.com/mlfina/China-A-Sort)
 
 ## Academic Background
 
@@ -39,7 +28,7 @@ For financial researches, we need equity characteristics. This repository is a t
 - rvar_capm.py, rvar_ff3.py -- residual variance of CAPM and fama french 3 factors model, rolling window is 3 months
 - rvar_mean.py -- variance of return, rolling window is 3 months
 - abr.py -- cumulative abnormal returns around earnings announcement dates
-- myre.py -- revisions in analysts’ earnings forecasts
+- re.py -- revisions in analysts’ earnings forecasts
 - sue.py -- unexpected quarterly earnings
 - ill.py -- illiquidity, rolling window is 3 months
 - maxret_d.py -- maximum daily returns, rolling window is 3 months
@@ -51,7 +40,7 @@ For financial researches, we need equity characteristics. This repository is a t
 ## How to use
 
 1. run accounting_60_hxz.py
-2. run all the single characteristic files (you can run them in parallel)
+2. run all the single characteristic files
 3. run merge_chars.py
 4. run impute_rank_output_bckmk.py (you may want to comment the part of sp1500 in this file if you just need the all stocks version)
 
@@ -109,7 +98,7 @@ Many papers contribute a lot to this repository. I am very sorry for only listin
   - [sas code from Green's website](https://drive.google.com/file/d/0BwwEXkCgXEdRQWZreUpKOHBXOUU/view)
 - **Replicating Anormalies** by [Hou Xue Zhang 2018 RFS](https://doi.org/10.1093/rfs/hhy131)
   - [Anormaly Portfolios by Zhang's website](http://global-q.org/index.html)
-
+ 
 ### Codes
 
 - Calculate equity characteristics with SAS code, mainly refering to [SAS code by Green Hand Zhang](https://drive.google.com/file/d/0BwwEXkCgXEdRQWZreUpKOHBXOUU/view).
@@ -117,3 +106,4 @@ Many papers contribute a lot to this repository. I am very sorry for only listin
 - DGTW code refers to [this python code](https://wrds-www.wharton.upenn.edu/pages/support/applications/python-replications/characteristic-based-benchmarks-daniel-grinblatt-titman-and-wermers-1997-python-version/) or [this SAS code](https://wrds-www.wharton.upenn.edu/pages/support/applications/portfolio-construction-and-market-anomalies/characteristic-based-benchmarks-daniel-grinblatt-titman-and-wermers-1997/)
 
 **All comments are welcome.**
+
